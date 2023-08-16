@@ -1,0 +1,5 @@
+{
+    "departments": {"columns": {"department_id": "int", "department_name": "str"}, "mode": "truncate"},
+    "jobs": {"columns": {"job_id": "int", "job_title": "str"}, "mode": "truncate"},
+    "employees": {"columns": {"employee_id": "int", "employee_name": "str", "datetime": "str", "department_id": "int", "job_id": "int"}, "type": "append"}
+}
