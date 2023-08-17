@@ -1,8 +1,8 @@
 from fastapi import FastAPI, HTTPException
 import os
 import logging
-from db import execute_sql_queries
-from csv_to_db import migrate_table
+from app.db import execute_sql_queries
+from app.csv_to_db import migrate_table
 
 
 # Create a FastAPI instance

@@ -3,7 +3,7 @@ import csv
 import json
 import pandas as pd
 import logging
-from db import create_db_connection
+from app.db import create_db_connection
 from dotenv import load_dotenv
 
 

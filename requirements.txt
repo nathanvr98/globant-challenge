@@ -3,3 +3,4 @@ sqlalchemy==1.4.23
 psycopg2
 pytest
 python-dotenv
+pandas
