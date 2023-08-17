@@ -1,6 +1,13 @@
 import os
 from sqlalchemy import create_engine
 import logging
+import psycopg2
+from dotenv import load_dotenv
+
+
+logging.basicConfig(level=logging.INFO)
+
+load_dotenv()
 
 # Read connection configuration from environment variables
 conn = {
@@ -11,22 +18,23 @@ conn = {
     "schema": os.environ.get("DB_SCHEMA", "globant")
 }
 
-# Create database connection
 def create_db_connection():
     """
     Create a database connection using the provided configuration.
 
     Returns:
-        sqlalchemy.engine.base.Engine: A database engine object.
+        psycopg2.extensions.connection: A database connection object.
     """
+    # Read connection configuration from environment variables
+
     # Build DB URL
-    db_url = f"postgresql+psycopg2://{conn['login']}:{conn['password']}@{conn['host']}:{conn['port']}/{conn['schema']}"
+    db_url = f"dbname='{conn['schema']}' user='{conn['login']}' password='{conn['password']}' host='{conn['host']}' port='{conn['port']}'"
 
     # Connect to the database
     try:
-        engine = create_engine(db_url)
+        connection = psycopg2.connect(db_url)
         logging.info("Database connection established")
-        return engine
+        return connection
     except Exception as e:
         logging.error(f"Error connecting to the database: {e}")
         raise

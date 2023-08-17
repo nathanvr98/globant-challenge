@@ -2,8 +2,10 @@ import os
 import csv
 import json
 import pandas as pd
+import logging
 from db import create_db_connection
 from dotenv import load_dotenv
+
 
 load_dotenv()
 
@@ -62,12 +64,26 @@ def migrate_table_data(cur, table_name: str, column_info: dict, file_path: str):
         file_path (str): The path to the CSV file.
 
     """
-    df = pd.read_csv(file_path, delimiter=",", names=column_info["columns"].keys())
+    print(cur)
+    print(table_name)
+    try:
+        df = pd.read_csv(file_path, delimiter=",", names=column_info["columns"].keys())
+        print(df.head())
 
-    for batch in df.batch(1000):
-        placeholders = ", ".join(["%s"] * len(column_info["columns"]))
-        ##insert_query = f"INSERT INTO {table_name} ({', '.join(column_info["columns"])}) VALUES ({placeholders});"
-        ##cur.executemany(insert_query, batch.to_numpy())
+        if column_info["mode"] == "truncate":
+            cur.execute("TRUNCATE TABLE {}".format(table_name))
+
+        batch_size = 1000
+        total_rows = df.shape[0]
+        for i in range(0, total_rows, batch_size):
+            batch = df.iloc[i:i+batch_size]
+            placeholders = ", ".join(["%s"] * len(column_info["columns"]))
+            insert_query = f"INSERT INTO {table_name} ({', '.join(column_info['columns'])}) VALUES ({placeholders});"
+            cur.executemany(insert_query, batch.to_numpy())
+
+    except Exception as e:
+        logging.error(e)
+        raise e
 
 def migrate_table(table_name: str):
     """
@@ -77,19 +93,20 @@ def migrate_table(table_name: str):
         table_name (str): The name of the table.
     """
     conn = create_db_connection()
-
+    print(conn)
     json_path = os.path.join(os.path.dirname(__file__), "columns.json")
-    print(json_path)
     column_info = get_column_info_from_json(table_name, json_path)
-    print(column_info)
     if not column_info:
         raise ValueError(f"Column info for {table_name} not found in JSON.")
 
     file_path = get_file_path(table_name)
     print(file_path)
 
-    ##with conn, conn.cursor() as cur:
-    ##    migrate_table_data(cur, table_name, column_info, file_path)
+    try:
+        with conn, conn.cursor() as cur:
+            migrate_table_data(cur, table_name, column_info, file_path)
+    except Exception as e:
+        print("Error during database operation:", e)
 
 def get_file_path(table_name: str):
     """

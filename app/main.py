@@ -8,7 +8,6 @@ from csv_to_db import migrate_table
 # Create a FastAPI instance
 app = FastAPI()
 
-
 @app.get("/hello")
 async def hello():
     return {"message": "Hello, world!"}
@@ -19,7 +18,7 @@ async def setup_db():
     sql_files = [
         "create_departments_table",
         "create_jobs_table",
-        "create_hired_employees_table",
+        "create_employees_table",
     ]
     
     for sql_file in sql_files:
