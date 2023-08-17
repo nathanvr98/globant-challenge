@@ -69,7 +69,7 @@ def migrate_table_data(cur, table_name: str, column_info: dict, file_path: str):
         df = pd.read_csv(file_path, delimiter=",", names=column_info["columns"].keys())
 
         if column_info["mode"] == "truncate":
-            cur.execute("TRUNCATE TABLE {}".format(table_name))
+            cur.execute("TRUNCATE TABLE {} CASCADE".format(table_name))
 
         batch_size = 1000
         total_rows = df.shape[0]
