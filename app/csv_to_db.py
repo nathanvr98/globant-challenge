@@ -6,6 +6,7 @@ import logging
 from app.db import create_db_connection
 from dotenv import load_dotenv
 
+logging.basicConfig(level=logging.INFO)
 
 load_dotenv()
 
@@ -64,11 +65,8 @@ def migrate_table_data(cur, table_name: str, column_info: dict, file_path: str):
         file_path (str): The path to the CSV file.
 
     """
-    print(cur)
-    print(table_name)
     try:
         df = pd.read_csv(file_path, delimiter=",", names=column_info["columns"].keys())
-        print(df.head())
 
         if column_info["mode"] == "truncate":
             cur.execute("TRUNCATE TABLE {}".format(table_name))
@@ -93,20 +91,18 @@ def migrate_table(table_name: str):
         table_name (str): The name of the table.
     """
     conn = create_db_connection()
-    print(conn)
     json_path = os.path.join(os.path.dirname(__file__), "columns.json")
     column_info = get_column_info_from_json(table_name, json_path)
     if not column_info:
         raise ValueError(f"Column info for {table_name} not found in JSON.")
 
     file_path = get_file_path(table_name)
-    print(file_path)
 
     try:
         with conn, conn.cursor() as cur:
             migrate_table_data(cur, table_name, column_info, file_path)
     except Exception as e:
-        print("Error during database operation:", e)
+        logging.error("Error during database operation:", e)
 
 def get_file_path(table_name: str):
     """
@@ -118,20 +114,7 @@ def get_file_path(table_name: str):
     Returns:
         str: The file path.
     """
-    if os.getenv("ENV") == 'LOCAL':
+    if os.getenv("ENV", "LOCAL") == 'LOCAL':
         return get_local_files().get(table_name, None)
     else:
         return get_s3_files().get(table_name, None)
-
-#Code for debug (ignore)    
-def main():
-    table_name = 'jobs'
-    
-    try:
-        migrate_table(table_name)
-        print(f"Datos de la tabla {table_name} migrados exitosamente.")
-    except Exception as e:
-        print(f"Error al migrar datos de la tabla {table_name}: {e}")
-
-if __name__ == "__main__":
-    main()
