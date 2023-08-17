@@ -1,5 +1,4 @@
 import os
-from sqlalchemy import create_engine
 import logging
 import psycopg2
 from dotenv import load_dotenv
@@ -11,9 +10,9 @@ load_dotenv()
 
 # Read connection configuration from environment variables
 conn = {
-    "login": os.environ.get("DB_LOGIN"),
-    "password": os.environ.get("DB_PASSWORD"),
-    "host": os.environ.get("DB_HOST"),
+    "login": os.environ.get("DB_LOGIN", "postgres"),
+    "password": os.environ.get("DB_PASSWORD", "postgres"),
+    "host": os.environ.get("DB_HOST", "db"),
     "port": os.environ.get("DB_PORT", "5432"),
     "schema": os.environ.get("DB_SCHEMA", "globant")
 }
@@ -51,8 +50,11 @@ def execute_sql_queries(sql_file_name):
     with open(file_path, "r") as file:
         query = file.read()
         engine = create_db_connection()
-        cursor = engine.connect().cursor()
-        cursor.execute(query)
-        cursor.close()
-        engine.dispose()
+        try:
+            with engine.connect() as connection:
+                connection.execute(query)
+            logging.info("SQL queries executed successfully")
+        except Exception as e:
+            logging.error(f"Error executing SQL queries: {e}")
+            raise
 
