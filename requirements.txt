@@ -7,4 +7,5 @@ pytest
 python-dotenv
 pandas
 fsspec
+numpy
 mangum
