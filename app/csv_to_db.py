@@ -5,6 +5,7 @@ import pandas as pd
 import logging
 from app.db import create_db_connection
 from dotenv import load_dotenv
+import psycopg2
 
 logging.basicConfig(level=logging.INFO)
 
@@ -66,7 +67,14 @@ def migrate_table_data(cur, table_name: str, column_info: dict, file_path: str):
 
     """
     try:
+        #Read csv and store it in a pandas df
         df = pd.read_csv(file_path, delimiter=",", names=column_info["columns"].keys(), na_values=['NaN', ''])
+
+        #Replace NaN with None
+        df.replace('NaN', None, inplace=True)
+        
+        #Handle NULL for inserting to Postgres
+        df = df.fillna(psycopg2.extensions.AsIs('NULL'))
 
         if column_info["mode"] == "truncate":
             cur.execute("TRUNCATE TABLE {} CASCADE".format(table_name))
