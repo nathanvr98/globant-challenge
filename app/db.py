@@ -37,27 +37,3 @@ def create_db_connection():
     except Exception as e:
         logging.error(f"Error connecting to the database: {e}")
         raise
-
-# Execute SQL queries from a file
-def execute_sql_queries(sql_file_name):
-    """
-    Execute SQL queries from a file.
-
-    Args:
-        sql_file_name (str): The name of the SQL file (without extension).
-    """
-    file_path = os.path.abspath(os.path.join("app", "ddl_scripts", f"{sql_file_name}.sql"))
-    with open(file_path, "r") as file:
-        query = file.read()
-        connection = create_db_connection()
-        try:
-            with connection.cursor() as cursor:
-                cursor.execute(query)
-            connection.commit()
-            logging.info("SQL queries executed successfully")
-        except Exception as e:
-            logging.error(f"Error executing SQL queries: {e}")
-            raise
-        finally:
-            connection.close()
-
