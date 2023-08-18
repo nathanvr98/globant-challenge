@@ -1,12 +1,15 @@
 from fastapi import FastAPI, HTTPException
 import os
 import logging
+from mangum import Magnum
 from app.db import execute_sql_queries
 from app.csv_to_db import migrate_table
 
 
 # Create a FastAPI instance
 app = FastAPI()
+
+handler = Magnum(app)
 
 @app.get("/hello")
 async def hello():
@@ -39,7 +42,3 @@ async def upload_data(table_name: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error uploading data to table {table_name}: {str(e)}")
 
-# Evento shutdown para cerrar la conexión a la base de datos al finalizar la API
-##@app.on_event("shutdown")
-##async def shutdown_db():
-##    close_db()
