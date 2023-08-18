@@ -14,8 +14,9 @@ conn = {
     "password": os.environ.get("DB_PASSWORD", "postgres"),
     "host": os.environ.get("DB_HOST", "db"),
     "port": os.environ.get("DB_PORT", "5432"),
-    "schema": os.environ.get("DB_SCHEMA", "globant")
+    "schema": os.environ.get("DB_SCHEMA", "globant"),
 }
+
 
 def create_db_connection():
     """
@@ -27,7 +28,8 @@ def create_db_connection():
     # Read connection configuration from environment variables
 
     # Build DB URL
-    db_url = f"dbname='{conn['schema']}' user='{conn['login']}' password='{conn['password']}' host='{conn['host']}' port='{conn['port']}'"
+    db_url = f"dbname='{conn['schema']}' user='{conn['login']}'"
+    f"password='{conn['password']}' host='{conn['host']}' port='{conn['port']}'"
 
     # Connect to the database
     try:
